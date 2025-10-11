@@ -1,0 +1,467 @@
+DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Language Selection</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: linear-gradient(
+        130deg,
+        rgba(249, 241, 249, 1) 0%,
+        rgba(234, 243, 253, 1) 35%,
+        rgba(237, 251, 242, 1) 100%
+      );
+      background-attachment: fixed;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Language Modal Styles */
+    .language-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 99999;
+      backdrop-filter: blur(5px);
+      transition: opacity 0.3s ease;
+    }
+   
+    .language-modal-content {
+      background: #fff;
+      padding: 40px;
+      border-radius: 16px;
+      max-width: 600px;
+      width: 90%;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+      animation: modalFadeIn 0.4s ease-out;
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+   
+    .language-modal-close {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #f1f3f4;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .language-modal-close:hover {
+      background: #e8eaed;
+      transform: rotate(90deg);
+    }
+    
+    .language-modal-close svg {
+      width: 18px;
+      height: 18px;
+      fill: #5f6368;
+    }
+   
+    .language-modal-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 10px;
+      color: #1a1a1a;
+      background: linear-gradient(135deg, #0064e0, #0084ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+   
+    .language-modal-subtitle {
+      font-size: 16px;
+      color: #5f6368;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+   
+    .language-search-container {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    
+    .language-search-input {
+      width: 100%;
+      padding: 14px 16px 14px 45px;
+      border: 1px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+    
+    .language-search-input:focus {
+      border-color: #0064e0;
+      box-shadow: 0 0 0 3px rgba(0, 100, 224, 0.15);
+      outline: none;
+      background: #fff;
+    }
+    
+    .language-search-icon {
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #5f6368;
+    }
+   
+    .language-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 30px;
+      max-height: 300px;
+      overflow-y: auto;
+      padding: 5px;
+    }
+    
+    .language-option {
+      display: flex;
+      align-items: center;
+      padding: 15px;
+      border: 2px solid #e8eaed;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: #fff;
+    }
+  
+    .language-option:hover {
+      border-color: #0064e0;
+      background: #f0f7ff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 100, 224, 0.1);
+    }
+   
+    .language-option.selected {
+      border-color: #0064e0;
+      background: #e6f1ff;
+      box-shadow: 0 4px 12px rgba(0, 100, 224, 0.15);
+    }
+   
+    .language-flag {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-right: 12px;
+      flex-shrink: 0;
+    }
+   
+    .language-name {
+      font-weight: 600;
+      font-size: 16px;
+      color: #1a1a1a;
+      text-align: left;
+    }
+    
+    .language-code {
+      font-size: 13px;
+      color: #5f6368;
+      margin-top: 2px;
+      text-align: left;
+    }
+   
+    .language-confirm-btn {
+      padding: 16px 30px;
+      background: linear-gradient(135deg, #0064e0, #0084ff);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      font-size: 16px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .language-confirm-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: 0.5s;
+    }
+    
+    .language-confirm-btn:hover::before {
+      left: 100%;
+    }
+   
+    .language-confirm-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 100, 224, 0.4);
+    }
+    
+    .language-confirm-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    
+    .language-confirm-btn:disabled:hover::before {
+      left: -100%;
+    }
+
+    .no-results {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 30px;
+      color: #5f6368;
+      font-style: italic;
+    }
+
+    /* Scrollbar styling */
+    .language-options::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .language-options::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+
+    .language-options::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 4px;
+    }
+
+    .language-options::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+
+    /* For Firefox */
+    .language-options {
+      scrollbar-width: thin;
+      scrollbar-color: #c1c1c1 #f1f1f1;
+    }
+
+    /* Mobile responsive adjustments */
+    @media (max-width: 768px) {
+      .language-modal-content {
+        padding: 30px 20px;
+      }
+      
+      .language-options {
+        grid-template-columns: 1fr;
+      }
+      
+      .language-modal-title {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+      
+      .language-modal-subtitle {
+        font-size: 15px;
+        margin-bottom: 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .language-modal-content {
+        padding: 25px 15px;
+      }
+      
+      .language-option {
+        padding: 12px;
+      }
+      
+      .language-flag {
+        width: 28px;
+        height: 28px;
+        font-size: 18px;
+        margin-right: 10px;
+      }
+      
+      .language-name {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Language Selection Modal -->
+  <div class="language-modal" id="languageModal">
+    <div class="language-modal-content">
+      <div class="language-modal-close" id="languageModalClose">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+      </div>
+      <h2 class="language-modal-title">Select Your Language</h2>
+      <p class="language-modal-subtitle">Choose your preferred language for the page content</p>
+      
+      <div class="language-search-container">
+        <div class="language-search-icon">
+          <i class="fas fa-search"></i>
+        </div>
+        <input type="text" class="language-search-input" id="languageSearchInput" placeholder="Search languages...">
+      </div>
+      
+      <div class="language-options" id="languageOptionsContainer">
+        <div class="language-option" data-lang="english">
+          <div class="language-flag">🇺🇸</div>
+          <div class="language-name">English</div>
+        </div>
+        <div class="language-option" data-lang="hindi">
+          <div class="language-flag">🇮🇳</div>
+          <div class="language-name">Hindi</div>
+        </div>
+        <div class="language-option" data-lang="spanish">
+          <div class="language-flag">🇪🇸</div>
+          <div class="language-name">Spanish</div>
+        </div>
+        <div class="language-option" data-lang="portuguese">
+          <div class="language-flag">🇵🇹</div>
+          <div class="language-name">Portuguese</div>
+        </div>
+        <div class="language-option" data-lang="tamil">
+          <div class="language-flag">🇮🇳</div>
+          <div class="language-name">Tamil</div>
+        </div>
+        <div class="language-option" data-lang="arabic">
+          <div class="language-flag">🇸🇦</div>
+          <div class="language-name">Arabic</div>
+        </div>
+        <div class="language-option" data-lang="french">
+          <div class="language-flag">🇫🇷</div>
+          <div class="language-name">French</div>
+        </div>
+        <div class="language-option" data-lang="vietnamese">
+          <div class="language-flag">🇻🇳</div>
+          <div class="language-name">Vietnamese</div>
+        </div>
+        <div class="language-option" data-lang="ghanaian">
+          <div class="language-flag">🇬🇭</div>
+          <div class="language-name">Ghanaian (Twi)</div>
+        </div>
+      </div>
+     
+      <button class="language-confirm-btn" id="languageConfirmBtn" disabled>Confirm Language</button>
+    </div>
+  </div>
+
+  <script>
+    // Wait for the DOM to be fully loaded
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get DOM elements
+      const languageModal = document.getElementById('languageModal');
+      const languageModalClose = document.getElementById('languageModalClose');
+      const languageSearchInput = document.getElementById('languageSearchInput');
+      const languageOptionsContainer = document.getElementById('languageOptionsContainer');
+      const languageOptions = document.querySelectorAll('.language-option');
+      const languageConfirmBtn = document.getElementById('languageConfirmBtn');
+
+      // Current selected language
+      let selectedLanguageOption = null;
+
+      // Language search functionality
+      function filterLanguages() {
+        const searchTerm = languageSearchInput.value.toLowerCase();
+        let hasVisibleResults = false;
+        
+        languageOptions.forEach(option => {
+          const languageName = option.querySelector('.language-name').textContent.toLowerCase();
+          const languageCode = option.querySelector('.language-code') ? option.querySelector('.language-code').textContent.toLowerCase() : '';
+          
+          if (languageName.includes(searchTerm) || languageCode.includes(searchTerm)) {
+            option.style.display = 'flex';
+            hasVisibleResults = true;
+          } else {
+            option.style.display = 'none';
+          }
+        });
+        
+        // Show no results message if needed
+        let noResults = document.querySelector('.no-results');
+        if (!hasVisibleResults) {
+          if (!noResults) {
+            noResults = document.createElement('div');
+            noResults.className = 'no-results';
+            noResults.textContent = 'No languages found. Try a different search.';
+            languageOptionsContainer.appendChild(noResults);
+          }
+        } else if (noResults) {
+          noResults.remove();
+        }
+      }
+      
+      languageSearchInput.addEventListener('input', filterLanguages);
+
+      // Language option selection
+      languageOptions.forEach(option => {
+        option.addEventListener('click', () => {
+          // Remove selected class from all options
+          languageOptions.forEach(opt => opt.classList.remove('selected'));
+          
+          // Add selected class to clicked option
+          option.classList.add('selected');
+          
+          // Store selected language
+          selectedLanguageOption = option.getAttribute('data-lang');
+          
+          // Enable confirm button
+          languageConfirmBtn.disabled = false;
+        });
+      });
+
+      // Confirm language selection
+      languageConfirmBtn.addEventListener('click', () => {
+        if (selectedLanguageOption) {
+          // Store the selected language in localStorage
+          localStorage.setItem('selectedLanguage', selectedLanguageOption);
+          
+          // Navigate to form.html
+          window.location.href = 'form.html';
+        }
+      });
+
+      // Focus on search input when modal opens
+      setTimeout(() => languageSearchInput.focus(), 100);
+    });
+  </script>
+</body>
+</html>
